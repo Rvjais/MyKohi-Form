@@ -1,0 +1,1 @@
+[{"_id":"69ce400c4b5d7dd84b6297a2","templateId":{"_id":"69ce3fd8cf6003d6863757cd","name":"MyKohi Client Onboarding","slug":"mykohi-onboarding"},"templateSlug":"mykohi-onboarding","files":[],"status":"submitted","submittedAt":"2026-04-02T10:08:12.107Z","createdAt":"2026-04-02T10:08:12.110Z","updatedAt":"2026-04-02T10:08:12.110Z","__v":0}]

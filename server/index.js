@@ -1,5 +1,6 @@
 import express from "express";
 import cors from "cors";
+import multer from "multer";
 import dotenv from "dotenv";
 import connectDB from "./config/db.js";
 import templateRoutes from "./routes/templates.js";
@@ -22,6 +23,16 @@ app.use("/api/submissions", submissionRoutes);
 
 app.get("/api/health", (req, res) => {
   res.json({ status: "ok", timestamp: new Date().toISOString() });
+});
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+  if (err instanceof multer.MulterError) {
+    return res.status(400).json({ message: `Upload error: ${err.message}` });
+  } else if (err) {
+    return res.status(res.statusCode === 200 ? 400 : res.statusCode).json({ message: err.message });
+  }
+  next();
 });
 
 // Connect DB (we do not await here specifically for serverless handlers since subsequent routes will run async against mongo connection pool)
