@@ -8,6 +8,7 @@ export default function MultiStepForm({ template, onSubmit }) {
   const [fileMap, setFileMap] = useState({});
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState(null);
 
   const sections = template.sections || [];
   const section = sections[currentStep];
@@ -40,6 +41,7 @@ export default function MultiStepForm({ template, onSubmit }) {
       setSubmitted(true);
     } catch (error) {
       console.error("Submit error:", error);
+      setError(error.response?.data?.message || "Failed to submit form. Please try again.");
     } finally {
       setSubmitting(false);
     }
@@ -68,22 +70,20 @@ export default function MultiStepForm({ template, onSubmit }) {
             <button
               key={s.id}
               onClick={() => i < currentStep && setCurrentStep(i)}
-              className={`flex items-center gap-1.5 text-xs font-medium transition-colors ${
-                i === currentStep
+              className={`flex items-center gap-1.5 text-xs font-medium transition-colors ${i === currentStep
                   ? "text-brand-700"
                   : i < currentStep
                     ? "text-brand-500 cursor-pointer hover:text-brand-700"
                     : "text-gray-400"
-              }`}
+                }`}
             >
               <span
-                className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${
-                  i === currentStep
+                className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${i === currentStep
                     ? "bg-brand-600 text-white"
                     : i < currentStep
                       ? "bg-brand-100 text-brand-700"
                       : "bg-gray-200 text-gray-500"
-                }`}
+                  }`}
               >
                 {i < currentStep ? <Check className="w-3.5 h-3.5" /> : i + 1}
               </span>
@@ -99,11 +99,16 @@ export default function MultiStepForm({ template, onSubmit }) {
         </div>
       </div>
 
-      {/* Section */}
       <div className="mb-8">
         <h2 className="text-xl font-bold text-gray-900 mb-1">{section.title}</h2>
         {section.description && <p className="text-sm text-gray-500">{section.description}</p>}
       </div>
+
+      {error && (
+        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+          {error}
+        </div>
+      )}
 
       <div className="space-y-5">
         {(section.fields || []).map((field) => (
@@ -124,11 +129,10 @@ export default function MultiStepForm({ template, onSubmit }) {
           type="button"
           onClick={() => setCurrentStep((s) => s - 1)}
           disabled={isFirst}
-          className={`flex items-center gap-1.5 px-4 py-2.5 text-sm font-medium rounded-lg transition-colors ${
-            isFirst
+          className={`flex items-center gap-1.5 px-4 py-2.5 text-sm font-medium rounded-lg transition-colors ${isFirst
               ? "text-gray-300 cursor-not-allowed"
               : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
-          }`}
+            }`}
         >
           <ChevronLeft className="w-4 h-4" />
           Back

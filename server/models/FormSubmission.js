@@ -8,7 +8,7 @@ const formSubmissionSchema = new mongoose.Schema(
       required: true,
     },
     templateSlug: String,
-    responses: { type: mongoose.Schema.Types.Mixed, required: true },
+    responses: { type: mongoose.Schema.Types.Mixed, required: true, default: {} },
     files: [
       {
         fieldId: String,

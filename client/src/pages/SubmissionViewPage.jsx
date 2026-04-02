@@ -8,7 +8,7 @@ function renderValue(value) {
     return <span className="text-gray-400 italic">Not provided</span>;
   if (Array.isArray(value))
     return value.length > 0 ? value.join(", ") : <span className="text-gray-400 italic">None selected</span>;
-  if (typeof value === "object") {
+  if (typeof value === "object" && value !== null) {
     return (
       <div className="space-y-0.5">
         {Object.entries(value).map(([k, v]) => (
@@ -87,13 +87,12 @@ export default function SubmissionViewPage() {
             </div>
           </div>
           <span
-            className={`text-xs font-medium px-3 py-1 rounded-full capitalize ${
-              submission.status === "reviewed"
+            className={`text-xs font-medium px-3 py-1 rounded-full capitalize ${submission.status === "reviewed"
                 ? "bg-green-50 text-green-700"
                 : submission.status === "submitted"
                   ? "bg-blue-50 text-blue-700"
                   : "bg-gray-100 text-gray-600"
-            }`}
+              }`}
           >
             {submission.status}
           </span>
@@ -135,13 +134,13 @@ export default function SubmissionViewPage() {
                             {(submission.files || []).filter(
                               (f) => f.fieldId === field.id
                             ).length === 0 && (
-                              <span className="text-gray-400 italic font-normal">
-                                No files uploaded
-                              </span>
-                            )}
+                                <span className="text-gray-400 italic font-normal">
+                                  No files uploaded
+                                </span>
+                              )}
                           </div>
                         ) : (
-                          renderValue(submission.responses[field.id])
+                          renderValue(submission.responses?.[field.id])
                         )}
                       </dd>
                     </div>
