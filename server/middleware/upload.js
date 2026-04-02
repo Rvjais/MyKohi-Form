@@ -2,10 +2,21 @@ import multer from "multer";
 import path from "path";
 import { v4 as uuidv4 } from "uuid";
 import fs from "fs";
+import os from "os";
 
-const uploadDir = process.env.UPLOAD_DIR || "./uploads";
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });
+let uploadDir = process.env.UPLOAD_DIR || "./uploads";
+
+if (process.env.VERCEL) {
+  uploadDir = os.tmpdir();
+}
+
+try {
+  if (!fs.existsSync(uploadDir)) {
+    fs.mkdirSync(uploadDir, { recursive: true });
+  }
+} catch (e) {
+  console.warn("Could not create upload dir, falling back to os.tmpdir()");
+  uploadDir = os.tmpdir();
 }
 
 const storage = multer.diskStorage({
