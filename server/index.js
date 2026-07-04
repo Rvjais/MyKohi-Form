@@ -1,8 +1,9 @@
 import express from "express";
 import cors from "cors";
 import multer from "multer";
+import mongoose from "mongoose";
 import dotenv from "dotenv";
-import connectDB, { isDBConnected } from "./config/db.js";
+import connectDB, { waitForDB } from "./config/db.js";
 import templateRoutes from "./routes/templates.js";
 import submissionRoutes from "./routes/submissions.js";
 
@@ -26,9 +27,10 @@ app.use(express.urlencoded({ extended: true }));
 app.use("/uploads", express.static("uploads"));
 
 // DB health check middleware
-app.use("/api", (req, res, next) => {
+app.use("/api", async (req, res, next) => {
   if (req.path === "/health") return next();
-  if (!isDBConnected()) {
+  await waitForDB();
+  if (mongoose.connection.readyState !== 1) {
     return res.status(503).json({
       message: "Database not connected. Please set MONGODB_URI in your Vercel environment variables.",
     });
