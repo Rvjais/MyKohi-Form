@@ -4,7 +4,7 @@ import helmet from "helmet";
 import multer from "multer";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
-import connectDB, { waitForDB } from "./config/db.js";
+import connectDB, { waitForDB, getLastDBError } from "./config/db.js";
 import templateRoutes from "./routes/templates.js";
 import submissionRoutes from "./routes/submissions.js";
 
@@ -45,7 +45,8 @@ app.use("/api", async (req, res, next) => {
   await waitForDB();
   if (mongoose.connection.readyState !== 1) {
     return res.status(503).json({
-      message: "Database not connected. Please set MONGODB_URI in your Vercel environment variables.",
+      message: "Database not connected.",
+      error: getLastDBError(),
     });
   }
   next();
