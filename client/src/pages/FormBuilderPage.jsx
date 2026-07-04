@@ -214,7 +214,10 @@ export default function FormBuilderPage() {
     }
 
     const invalidFields = sections.some((s) =>
-      (s.fields || []).some((f) => !f.label || f.label.trim() === "")
+      (s.fields || []).some((f) => {
+        if (f.type === "heading" || f.type === "divider") return false;
+        return !f.label || f.label.trim() === "";
+      })
     );
     if (invalidFields) {
       alert("All fields must have a label");
