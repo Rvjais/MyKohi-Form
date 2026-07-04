@@ -100,7 +100,10 @@ export default function SubmissionViewPage() {
 
         {/* Content */}
         <div className="p-6">
-          {sections.map((section) => (
+          {sections.length === 0 ? (
+            <p className="text-gray-400 text-center py-8">No sections in this form.</p>
+          ) : (
+            sections.map((section) => (
             <div key={section.id} className="mb-8 last:mb-0">
               <h2 className="text-sm font-semibold text-gray-900 uppercase tracking-wider mb-4 pb-2 border-b border-gray-100">
                 {section.title}
@@ -147,7 +150,8 @@ export default function SubmissionViewPage() {
                   ))}
               </div>
             </div>
-          ))}
+          ))
+        )}
         </div>
       </div>
     </div>

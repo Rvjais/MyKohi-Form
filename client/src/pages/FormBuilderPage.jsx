@@ -33,17 +33,15 @@ const FIELD_TYPES = [
   { type: "fullname", label: "Full Name", icon: User },
 ];
 
-let idCounter = 0;
-
 function generateId(prefix = "field") {
-  return `${prefix}_${Date.now()}_${++idCounter}`;
+  return `${prefix}_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
 }
 
 function createField(type) {
   const base = { id: generateId("field"), type, label: "", required: false };
   if (type === "select" || type === "checkbox" || type === "radio") {
     base.options = ["Option 1"];
-    if (type === "checkbox") base.allowOther = false;
+    base.allowOther = false;
   }
   if (type === "fullname") {
     base.subFields = [

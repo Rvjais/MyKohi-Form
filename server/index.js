@@ -1,5 +1,6 @@
 import express from "express";
 import cors from "cors";
+import helmet from "helmet";
 import multer from "multer";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
@@ -21,6 +22,17 @@ app.use(cors({
     "https://my-kohi-form.vercel.app",
   ],
   credentials: true,
+}));
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: "cross-origin" },
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      fontSrc: ["'self'", "https://fonts.gstatic.com"],
+      styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+      imgSrc: ["'self'", "data:"],
+    },
+  },
 }));
 app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ extended: true }));
@@ -51,7 +63,8 @@ app.use((err, req, res, next) => {
   if (err instanceof multer.MulterError) {
     return res.status(400).json({ message: `Upload error: ${err.message}` });
   } else if (err) {
-    return res.status(res.statusCode === 200 ? 400 : res.statusCode).json({ message: err.message });
+    const status = res.statusCode >= 400 ? res.statusCode : 500;
+    return res.status(status).json({ message: err.message });
   }
   next();
 });

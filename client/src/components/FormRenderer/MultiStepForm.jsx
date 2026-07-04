@@ -89,7 +89,7 @@ export default function MultiStepForm({ template, onSubmit }) {
         </div>
         <h2 className="text-2xl font-bold text-gray-900 mb-2">Thank You!</h2>
         <p className="text-gray-600 max-w-md mx-auto">
-          Your onboarding form has been submitted successfully. Our team will review your information and get back to you shortly.
+          Your {template.name || "form"} has been submitted successfully. Our team will review your information and get back to you shortly.
         </p>
       </div>
     );

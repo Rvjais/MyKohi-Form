@@ -33,6 +33,7 @@ const fieldSchema = new mongoose.Schema(
         label: String,
         placeholder: String,
         type: { type: String, default: "text" },
+        _id: false,
       },
     ],
   },

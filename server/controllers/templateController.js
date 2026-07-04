@@ -57,10 +57,15 @@ export const updateTemplate = async (req, res) => {
 
 export const deleteTemplate = async (req, res) => {
   try {
-    const template = await FormTemplate.findById(req.params.id);
-    if (!template) return res.status(404).json({ message: "Template not found" });
-    if (template.isDefault) return res.status(400).json({ message: "Cannot delete default template" });
-    await template.deleteOne();
+    const template = await FormTemplate.findOneAndDelete({
+      _id: req.params.id,
+      isDefault: { $ne: true },
+    });
+    if (!template) {
+      const existing = await FormTemplate.findById(req.params.id);
+      if (!existing) return res.status(404).json({ message: "Template not found" });
+      return res.status(400).json({ message: "Cannot delete default template" });
+    }
     res.json({ message: "Template deleted" });
   } catch (error) {
     res.status(500).json({ message: error.message });

@@ -7,6 +7,7 @@ export default function SubmissionsPage() {
   const [submissions, setSubmissions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState("all");
+  const [updatingId, setUpdatingId] = useState(null);
 
   useEffect(() => {
     submissionApi
@@ -28,12 +29,15 @@ export default function SubmissionsPage() {
   };
 
   const handleStatusChange = async (id, status) => {
+    setUpdatingId(id);
     try {
       await submissionApi.updateStatus(id, status);
       setSubmissions((prev) => prev.map((s) => (s._id === id ? { ...s, status } : s)));
     } catch (err) {
       console.error("Failed to update status:", err);
       alert("Failed to update");
+    } finally {
+      setUpdatingId(null);
     }
   };
 
@@ -125,6 +129,7 @@ export default function SubmissionsPage() {
                   <td className="px-5 py-4">
                     <select
                       value={sub.status}
+                      disabled={updatingId === sub._id}
                       onChange={(e) => handleStatusChange(sub._id, e.target.value)}
                       className={`text-xs font-medium px-2.5 py-1 rounded-full cursor-pointer border-0 outline-none ${
                         sub.status === "submitted"
