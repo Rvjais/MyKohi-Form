@@ -41,6 +41,7 @@ app.use("/uploads", express.static("uploads"));
 // DB health check middleware
 app.use("/api", async (req, res, next) => {
   if (req.path === "/health") return next();
+  if (req.method === "OPTIONS") return next();
   await waitForDB();
   if (mongoose.connection.readyState !== 1) {
     return res.status(503).json({
