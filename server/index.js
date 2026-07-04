@@ -2,7 +2,7 @@ import express from "express";
 import cors from "cors";
 import multer from "multer";
 import dotenv from "dotenv";
-import connectDB from "./config/db.js";
+import connectDB, { isDBConnected } from "./config/db.js";
 import templateRoutes from "./routes/templates.js";
 import submissionRoutes from "./routes/submissions.js";
 
@@ -24,6 +24,17 @@ app.use(cors({
 app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ extended: true }));
 app.use("/uploads", express.static("uploads"));
+
+// DB health check middleware
+app.use("/api", (req, res, next) => {
+  if (req.path === "/health") return next();
+  if (!isDBConnected()) {
+    return res.status(503).json({
+      message: "Database not connected. Please set MONGODB_URI in your Vercel environment variables.",
+    });
+  }
+  next();
+});
 
 // Routes
 app.use("/api/templates", templateRoutes);
