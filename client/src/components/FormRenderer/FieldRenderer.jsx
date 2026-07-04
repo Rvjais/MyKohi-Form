@@ -1,3 +1,4 @@
+import { useRef, useState } from "react";
 import { Upload, X } from "lucide-react";
 
 export default function FieldRenderer({ field, value, onChange, files, onFileChange }) {
@@ -185,6 +186,27 @@ export default function FieldRenderer({ field, value, onChange, files, onFileCha
 
     case "file": {
       const selectedFiles = files || [];
+      const fileInputRef = useRef(null);
+      const [isDragOver, setIsDragOver] = useState(false);
+
+      const handleFileSelect = (e) => {
+        onFileChange(field.id, Array.from(e.target.files));
+        e.target.value = "";
+      };
+
+      const handleDrop = (e) => {
+        e.preventDefault();
+        setIsDragOver(false);
+        onFileChange(field.id, Array.from(e.dataTransfer.files));
+      };
+
+      const handleDragOver = (e) => {
+        e.preventDefault();
+        setIsDragOver(true);
+      };
+
+      const handleDragLeave = () => setIsDragOver(false);
+
       return (
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1.5">
@@ -192,25 +214,38 @@ export default function FieldRenderer({ field, value, onChange, files, onFileCha
             {field.required && <span className="text-red-500 ml-0.5">*</span>}
           </label>
           {field.description && <p className="text-xs text-gray-500 mb-1.5">{field.description}</p>}
-          <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-brand-400 transition-colors">
+          <div
+            onDrop={handleDrop}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors cursor-pointer ${
+              isDragOver
+                ? "border-brand-500 bg-brand-50"
+                : "border-gray-300 hover:border-brand-400"
+            }`}
+            onClick={() => fileInputRef.current?.click()}
+          >
             <Upload className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-            <p className="text-sm text-gray-600 mb-1">Drag and drop files here, or click to browse</p>
+            <p className="text-sm text-gray-600 mb-1">
+              {isDragOver ? "Drop files here" : "Drag and drop files here, or click to browse"}
+            </p>
+            <button
+              type="button"
+              className="inline-block mt-2 px-4 py-1.5 bg-brand-50 text-brand-700 text-sm font-medium rounded-md hover:bg-brand-100 transition-colors"
+              onClick={(e) => {
+                e.stopPropagation();
+                fileInputRef.current?.click();
+              }}
+            >
+              Browse Files
+            </button>
             <input
+              ref={fileInputRef}
               type="file"
               multiple
-              className="absolute inset-0 opacity-0 cursor-pointer"
-              style={{ position: "relative", width: "100%", opacity: 0, height: 0 }}
-              onChange={(e) => onFileChange(field.id, Array.from(e.target.files))}
+              className="hidden"
+              onChange={handleFileSelect}
             />
-            <label className="inline-block mt-2 px-4 py-1.5 bg-brand-50 text-brand-700 text-sm font-medium rounded-md cursor-pointer hover:bg-brand-100 transition-colors">
-              Browse Files
-              <input
-                type="file"
-                multiple
-                className="hidden"
-                onChange={(e) => onFileChange(field.id, Array.from(e.target.files))}
-              />
-            </label>
           </div>
           {selectedFiles.length > 0 && (
             <div className="mt-2 space-y-1">

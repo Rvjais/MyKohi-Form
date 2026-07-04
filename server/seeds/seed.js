@@ -7,6 +7,7 @@ import feedbackTemplate from "./feedbackTemplate.js";
 import referralTemplate from "./referralTemplate.js";
 
 dotenv.config({ path: "../.env" });
+dotenv.config({ path: "./.env" });
 
 const MONGODB_URI = process.env.MONGODB_URI || "mongodb://localhost:27017/mykohi_onboarding";
 

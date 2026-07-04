@@ -33,12 +33,14 @@ const FIELD_TYPES = [
   { type: "fullname", label: "Full Name", icon: User },
 ];
 
-function generateId() {
-  return "field_" + Math.random().toString(36).slice(2, 9);
+let idCounter = 0;
+
+function generateId(prefix = "field") {
+  return `${prefix}_${Date.now()}_${++idCounter}`;
 }
 
 function createField(type) {
-  const base = { id: generateId(), type, label: "", required: false };
+  const base = { id: generateId("field"), type, label: "", required: false };
   if (type === "select" || type === "checkbox" || type === "radio") {
     base.options = ["Option 1"];
     if (type === "checkbox") base.allowOther = false;
@@ -191,14 +193,39 @@ export default function FormBuilderPage() {
       .finally(() => setLoading(false));
   }, [id]);
 
+  const sanitizeSlug = (str) =>
+    str
+      .toLowerCase()
+      .replace(/[^a-z0-9-]+/g, "-")
+      .replace(/^-+|-+$/g, "");
+
   const handleSave = async () => {
     if (!name || !slug) {
       alert("Name and slug are required");
       return;
     }
+
+    const cleanSlug = sanitizeSlug(slug);
+    if (!cleanSlug) {
+      alert("Slug must contain at least one valid character (a-z, 0-9, hyphens)");
+      return;
+    }
+
+    if (slug !== cleanSlug) {
+      setSlug(cleanSlug);
+    }
+
+    const invalidFields = sections.some((s) =>
+      (s.fields || []).some((f) => !f.label || f.label.trim() === "")
+    );
+    if (invalidFields) {
+      alert("All fields must have a label");
+      return;
+    }
+
     setSaving(true);
     try {
-      const data = { name, description, slug, sections };
+      const data = { name, description, slug: cleanSlug, sections };
       if (id) {
         await templateApi.update(id, data);
       } else {
@@ -216,7 +243,7 @@ export default function FormBuilderPage() {
     const num = sections.length + 1;
     setSections([
       ...sections,
-      { id: `section_${Date.now()}`, title: `Section ${num}`, description: "", fields: [] },
+      { id: generateId("section"), title: `Section ${num}`, description: "", fields: [] },
     ]);
   };
 

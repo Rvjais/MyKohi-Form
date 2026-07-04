@@ -1,3 +1,4 @@
+import fs from "fs";
 import FormSubmission from "../models/FormSubmission.js";
 
 export const getSubmissions = async (req, res) => {
@@ -70,6 +71,19 @@ export const deleteSubmission = async (req, res) => {
   try {
     const submission = await FormSubmission.findByIdAndDelete(req.params.id);
     if (!submission) return res.status(404).json({ message: "Submission not found" });
+
+    if (submission.files && submission.files.length > 0) {
+      for (const file of submission.files) {
+        if (file.path && fs.existsSync(file.path)) {
+          try {
+            fs.unlinkSync(file.path);
+          } catch (e) {
+            console.warn("Failed to delete file:", file.path);
+          }
+        }
+      }
+    }
+
     res.json({ message: "Submission deleted" });
   } catch (error) {
     res.status(500).json({ message: error.message });

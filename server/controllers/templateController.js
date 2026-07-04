@@ -39,9 +39,15 @@ export const createTemplate = async (req, res) => {
   }
 };
 
+const ALLOWED_FIELDS = ["name", "description", "slug", "sections"];
+
 export const updateTemplate = async (req, res) => {
   try {
-    const template = await FormTemplate.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
+    const updates = {};
+    for (const key of ALLOWED_FIELDS) {
+      if (req.body[key] !== undefined) updates[key] = req.body[key];
+    }
+    const template = await FormTemplate.findByIdAndUpdate(req.params.id, updates, { new: true, runValidators: true });
     if (!template) return res.status(404).json({ message: "Template not found" });
     res.json(template);
   } catch (error) {

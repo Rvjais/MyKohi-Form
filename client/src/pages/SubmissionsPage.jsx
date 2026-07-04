@@ -21,7 +21,8 @@ export default function SubmissionsPage() {
     try {
       await submissionApi.delete(id);
       setSubmissions((prev) => prev.filter((s) => s._id !== id));
-    } catch {
+    } catch (err) {
+      console.error("Failed to delete submission:", err);
       alert("Failed to delete");
     }
   };
@@ -30,7 +31,8 @@ export default function SubmissionsPage() {
     try {
       await submissionApi.updateStatus(id, status);
       setSubmissions((prev) => prev.map((s) => (s._id === id ? { ...s, status } : s)));
-    } catch {
+    } catch (err) {
+      console.error("Failed to update status:", err);
       alert("Failed to update");
     }
   };

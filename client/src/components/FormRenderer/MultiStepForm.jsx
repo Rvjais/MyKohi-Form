@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { ChevronLeft, ChevronRight, Send, Check } from "lucide-react";
 import FieldRenderer from "./FieldRenderer";
 
@@ -15,16 +15,50 @@ export default function MultiStepForm({ template, onSubmit }) {
   const isLast = currentStep === sections.length - 1;
   const isFirst = currentStep === 0;
 
+  const allFields = useMemo(() => {
+    return sections.flatMap((s) => s.fields || []);
+  }, [sections]);
+
+  const getUnfilledRequired = useCallback(() => {
+    return allFields.filter((f) => {
+      if (!f.required) return false;
+      const val = responses[f.id];
+      if (f.type === "file") return !fileMap[f.id] || fileMap[f.id].length === 0;
+      if (Array.isArray(val)) return val.length === 0;
+      if (typeof val === "object" && val !== null) {
+        return (f.subFields || []).some((sf) => !val[sf.id]);
+      }
+      return !val || val.trim() === "";
+    });
+  }, [allFields, responses, fileMap]);
+
   const handleChange = useCallback((fieldId, value) => {
     setResponses((prev) => ({ ...prev, [fieldId]: value }));
+    setError(null);
   }, []);
 
   const handleFileChange = useCallback((fieldId, files) => {
     setFileMap((prev) => ({ ...prev, [fieldId]: files }));
+    setError(null);
   }, []);
 
+  const handleStepChange = (step) => {
+    setCurrentStep(step);
+    setError(null);
+  };
+
   const handleSubmit = async () => {
+    const missing = getUnfilledRequired();
+    if (missing.length > 0) {
+      const labels = missing.map((f) => f.label || f.id).slice(0, 3);
+      const msg = `Please fill in required fields: ${labels.join(", ")}${missing.length > 3 ? ` and ${missing.length - 3} more` : ""}`;
+      setError(msg);
+      setSubmitting(false);
+      return;
+    }
+
     setSubmitting(true);
+    setError(null);
     try {
       const formData = new FormData();
       formData.append("templateId", template._id);
@@ -32,7 +66,7 @@ export default function MultiStepForm({ template, onSubmit }) {
       formData.append("responses", JSON.stringify(responses));
 
       Object.entries(fileMap).forEach(([fieldId, files]) => {
-        files.forEach((file) => {
+        [...files].forEach((file) => {
           formData.append(fieldId, file);
         });
       });
@@ -61,6 +95,14 @@ export default function MultiStepForm({ template, onSubmit }) {
     );
   }
 
+  if (sections.length === 0 || !section) {
+    return (
+      <div className="text-center py-16 text-gray-500">
+        <p>This form has no sections configured yet.</p>
+      </div>
+    );
+  }
+
   return (
     <div>
       {/* Progress bar */}
@@ -69,7 +111,7 @@ export default function MultiStepForm({ template, onSubmit }) {
           {sections.map((s, i) => (
             <button
               key={s.id}
-              onClick={() => i < currentStep && setCurrentStep(i)}
+              onClick={() => i < currentStep && handleStepChange(i)}
               className={`flex items-center gap-1.5 text-xs font-medium transition-colors ${i === currentStep
                   ? "text-brand-700"
                   : i < currentStep
@@ -127,7 +169,7 @@ export default function MultiStepForm({ template, onSubmit }) {
       <div className="flex items-center justify-between mt-10 pt-6 border-t border-gray-200">
         <button
           type="button"
-          onClick={() => setCurrentStep((s) => s - 1)}
+          onClick={() => handleStepChange(currentStep - 1)}
           disabled={isFirst}
           className={`flex items-center gap-1.5 px-4 py-2.5 text-sm font-medium rounded-lg transition-colors ${isFirst
               ? "text-gray-300 cursor-not-allowed"
@@ -151,7 +193,7 @@ export default function MultiStepForm({ template, onSubmit }) {
         ) : (
           <button
             type="button"
-            onClick={() => setCurrentStep((s) => s + 1)}
+            onClick={() => handleStepChange(currentStep + 1)}
             className="flex items-center gap-1.5 px-5 py-2.5 bg-brand-600 text-white text-sm font-medium rounded-lg hover:bg-brand-700 transition-colors"
           >
             Next

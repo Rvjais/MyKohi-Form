@@ -63,10 +63,10 @@ export default function DashboardLayout() {
 
         {/* Bottom */}
         <div className="px-3 pb-3 mt-auto">
-          <button className="flex items-center gap-2 px-3 py-2.5 w-full text-sm text-sidebar-text hover:text-sidebar-text-active hover:bg-sidebar-hover rounded-lg transition-colors">
+          <div className="flex items-center gap-2 px-3 py-2.5 text-sm text-sidebar-text opacity-50">
             <LogOut className="w-4 h-4" />
             Logout
-          </button>
+          </div>
         </div>
       </aside>
 
