@@ -26,7 +26,7 @@ async function seed() {
     for (const template of templatesToSeed) {
       const existing = await FormTemplate.findOne({ slug: template.slug });
       if (existing) {
-        await FormTemplate.findByIdAndUpdate(existing._id, template);
+        await FormTemplate.findByIdAndUpdate(existing._id, template, { runValidators: true });
         console.log(`Template '${template.name}' updated`);
       } else {
         await FormTemplate.create(template);

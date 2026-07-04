@@ -223,6 +223,12 @@ export default function FormBuilderPage() {
       return;
     }
 
+    const invalidSections = sections.some((s) => !s.title || s.title.trim() === "");
+    if (invalidSections) {
+      alert("All sections must have a title");
+      return;
+    }
+
     setSaving(true);
     try {
       const data = { name, description, slug: cleanSlug, sections };

@@ -24,7 +24,6 @@ const formSubmissionSchema = new mongoose.Schema(
       enum: ["draft", "submitted", "reviewed"],
       default: "submitted",
     },
-    submittedAt: { type: Date, default: Date.now },
   },
   { timestamps: true }
 );

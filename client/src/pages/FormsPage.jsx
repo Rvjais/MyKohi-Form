@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { templateApi } from "../utils/api";
 import {
   Plus,
@@ -9,12 +9,13 @@ import {
   Trash2,
   Copy,
   Clock,
-  MoreVertical,
+  CopyPlus,
 } from "lucide-react";
 
 export default function FormsPage() {
   const [templates, setTemplates] = useState([]);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     templateApi
@@ -36,6 +37,25 @@ export default function FormsPage() {
 
   const handleCopyLink = (slug) => {
     navigator.clipboard.writeText(`${window.location.origin}/form/${slug}`);
+  };
+
+  const handleDuplicate = async (t) => {
+    try {
+      const res = await templateApi.getById(t._id);
+      const original = res.data;
+      const newName = `${original.name} (Copy)`;
+      const baseSlug = original.slug.replace(/-\d+$/, "");
+      const newSlug = `${baseSlug}-${Date.now()}`;
+      const { data: created } = await templateApi.create({
+        name: newName,
+        description: original.description,
+        slug: newSlug,
+        sections: original.sections,
+      });
+      setTemplates((prev) => [created, ...prev]);
+    } catch (err) {
+      alert(err.response?.data?.message || "Failed to duplicate");
+    }
   };
 
   if (loading) {
@@ -137,6 +157,13 @@ export default function FormsPage() {
                 >
                   <Copy className="w-3 h-3" />
                   Copy Link
+                </button>
+                <button
+                  onClick={() => handleDuplicate(t)}
+                  className="flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-gray-600 bg-gray-50 rounded-md hover:bg-gray-100 transition-colors"
+                >
+                  <CopyPlus className="w-3 h-3" />
+                  Duplicate
                 </button>
               </div>
             </div>

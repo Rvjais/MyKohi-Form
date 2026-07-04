@@ -55,10 +55,15 @@ export const createSubmission = async (req, res) => {
 
 export const updateSubmissionStatus = async (req, res) => {
   try {
+    const { status } = req.body;
+    const valid = ["draft", "submitted", "reviewed"];
+    if (!valid.includes(status)) {
+      return res.status(400).json({ message: `Invalid status. Must be one of: ${valid.join(", ")}` });
+    }
     const submission = await FormSubmission.findByIdAndUpdate(
       req.params.id,
-      { status: req.body.status },
-      { new: true }
+      { status },
+      { new: true, runValidators: true }
     );
     if (!submission) return res.status(404).json({ message: "Submission not found" });
     res.json(submission);

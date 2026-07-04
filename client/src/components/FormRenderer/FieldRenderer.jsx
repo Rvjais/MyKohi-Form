@@ -4,6 +4,8 @@ import { Upload, X } from "lucide-react";
 export default function FieldRenderer({ field, value, onChange, files, onFileChange }) {
   const baseInput =
     "w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-shadow";
+  const fileInputRef = useRef(null);
+  const [isDragOver, setIsDragOver] = useState(false);
 
   switch (field.type) {
     case "heading":
@@ -186,18 +188,31 @@ export default function FieldRenderer({ field, value, onChange, files, onFileCha
 
     case "file": {
       const selectedFiles = files || [];
-      const fileInputRef = useRef(null);
-      const [isDragOver, setIsDragOver] = useState(false);
 
       const handleFileSelect = (e) => {
         onFileChange(field.id, Array.from(e.target.files));
         e.target.value = "";
       };
 
+      const MAX_SIZE = 50 * 1024 * 1024;
       const handleDrop = (e) => {
         e.preventDefault();
         setIsDragOver(false);
-        onFileChange(field.id, Array.from(e.dataTransfer.files));
+        const droppedFiles = Array.from(e.dataTransfer.files);
+        const oversized = droppedFiles.filter((f) => f.size > MAX_SIZE);
+        if (oversized.length > 0) {
+          alert(`Files over 50MB are not allowed: ${oversized.map((f) => f.name).join(", ")}`);
+          return;
+        }
+        onFileChange(field.id, droppedFiles);
+      };
+
+      const handleClick = () => {
+        const input = fileInputRef.current;
+        if (input) {
+          input.value = "";
+          input.click();
+        }
       };
 
       const handleDragOver = (e) => {
@@ -223,7 +238,7 @@ export default function FieldRenderer({ field, value, onChange, files, onFileCha
                 ? "border-brand-500 bg-brand-50"
                 : "border-gray-300 hover:border-brand-400"
             }`}
-            onClick={() => fileInputRef.current?.click()}
+            onClick={handleClick}
           >
             <Upload className="w-8 h-8 text-gray-400 mx-auto mb-2" />
             <p className="text-sm text-gray-600 mb-1">
@@ -234,7 +249,7 @@ export default function FieldRenderer({ field, value, onChange, files, onFileCha
               className="inline-block mt-2 px-4 py-1.5 bg-brand-50 text-brand-700 text-sm font-medium rounded-md hover:bg-brand-100 transition-colors"
               onClick={(e) => {
                 e.stopPropagation();
-                fileInputRef.current?.click();
+                handleClick();
               }}
             >
               Browse Files

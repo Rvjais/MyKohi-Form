@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { submissionApi } from "../utils/api";
-import { Eye, Trash2, FileText, Clock, Search, Filter } from "lucide-react";
+import { Eye, Trash2, FileText, Clock } from "lucide-react";
 
 export default function SubmissionsPage() {
   const [submissions, setSubmissions] = useState([]);
