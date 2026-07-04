@@ -5,7 +5,14 @@ let connectPromise = null;
 mongoose.set("bufferCommands", false);
 
 const connectDB = async () => {
-  if (connectPromise) return connectPromise;
+  if (connectPromise) {
+    try {
+      await connectPromise;
+    } catch {
+      connectPromise = null;
+    }
+    if (isDBConnected()) return;
+  }
   if (!process.env.MONGODB_URI) {
     console.warn("MONGODB_URI not set, skipping DB connection");
     return;
@@ -25,8 +32,15 @@ export const isDBConnected = () =>
 
 export const waitForDB = async () => {
   if (isDBConnected()) return;
-  if (!connectPromise) return;
-  await connectPromise;
+  if (!connectPromise) {
+    await connectDB();
+    return;
+  }
+  try {
+    await connectPromise;
+  } catch {
+    await connectDB();
+  }
 };
 
 export default connectDB;
